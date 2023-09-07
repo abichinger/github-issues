@@ -174,6 +174,15 @@ Actual: ${response.statusCode}
 Body: ${response.body}
 ''';
   }
+
+  String? get message {
+    try {
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      return json['message'] ?? 'Ups! Something went wrong';
+    } catch (e) {
+      return null;
+    }
+  }
 }
 
 assertStatusCode(int expected, http.Response res) {
@@ -199,6 +208,24 @@ class IssueRequest {
     this.labels,
     this.assignees,
   });
+
+  IssueRequest copyWith({
+    String? title,
+    String? body,
+    String? assignee,
+    int? milestone,
+    List<String>? labels,
+    List<String>? assignees,
+  }) {
+    return IssueRequest(
+      title: title ?? this.title,
+      body: body ?? this.body,
+      assignee: assignee ?? this.assignee,
+      milestone: milestone ?? this.milestone,
+      labels: labels ?? this.labels,
+      assignees: assignees ?? this.assignees,
+    );
+  }
 
   factory IssueRequest.fromJson(Map<String, dynamic> json) =>
       _$IssueRequestFromJson(json);
