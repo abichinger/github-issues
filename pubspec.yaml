@@ -1,6 +1,6 @@
 name: github_issues
 description: Flutter package to create Github issues
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/abichinger/github-issues
 repository: https://github.com/abichinger/github-issues
 
