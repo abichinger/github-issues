@@ -13,6 +13,8 @@ and the Flutter guide for
 
 Use Github issues to collect user feedback.
 
+<img src="screenshots/screenshots.png" alt="Screenshots">
+
 ## Getting started
 
 1. Create a repository to store the user feedback (or use an existing one).
@@ -21,6 +23,8 @@ Use Github issues to collect user feedback.
 **Option 2**: Create a [Github App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) -> [Install](https://docs.github.com/en/enterprise-cloud@latest/apps/using-github-apps/installing-your-own-github-app) your own Github App -> [Generate a private key](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps) for your Github App.
 
 ## Usage
+
+### Dart
 
 ```dart
 import 'dart:io';
@@ -55,6 +59,54 @@ void main() async {
       title: 'Hello World!',
       body: '...',
       labels: ['bug'],
+    ),
+  );
+}
+```
+
+### Flutter
+
+```dart
+import 'package:github_issues/github_issues.dart';
+
+Widget _buildDialog(
+  BuildContext context, {
+  bool showTitle = true,
+  IssueRequest? initialValue,
+}) {
+  return AlertDialog(
+    scrollable: true,
+    title: const Text(
+      'Thanks for your feedback!',
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    content: Column(
+      children: [
+        const Text('Let us know how we can improve this example.'),
+        const SizedBox(height: 16),
+        GithubIssueForm(
+          showTitle: showTitle,
+          initialValue: initialValue,
+          onClose: () {
+            Navigator.pop(context);
+          },
+          onSubmit: (issue) async {
+            final token = await personalToken;
+            final github = Github(Authentication.token(token));
+
+            await github.createIssue(
+              owner: 'abichinger',
+              repo: 'nonobattle-issues',
+              issue: issue,
+            );
+
+            Navigator.pop(context);
+          },
+        ),
+      ],
     ),
   );
 }
