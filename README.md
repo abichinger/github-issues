@@ -13,7 +13,7 @@ and the Flutter guide for
 
 Use Github issues to collect user feedback.
 
-<img src="screenshots/screenshots.png" alt="Screenshots">
+<img src="https://github.com/abichinger/github-issues/raw/main/screenshots/screenshots.png" alt="Screenshots">
 
 ## Getting started
 
@@ -65,6 +65,8 @@ void main() async {
 ```
 
 ### Flutter
+
+[Full example](https://pub.dev/packages/github_issues/example)
 
 ```dart
 import 'package:github_issues/github_issues.dart';
