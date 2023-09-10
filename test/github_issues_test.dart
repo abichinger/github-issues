@@ -25,7 +25,7 @@ void main() {
     final app = await _app;
     final id = await app.getInstallationId(
       owner: 'abichinger',
-      repo: 'nonobattle-issues',
+      repo: 'github-issues-test',
     );
     expect(id >= 0, true);
   });
@@ -34,7 +34,7 @@ void main() {
     final app = await _app;
     final id = await app.getInstallationId(
       owner: 'abichinger',
-      repo: 'nonobattle-issues',
+      repo: 'github-issues-test',
     );
     final token = await app.getInstallationToken(id);
     expect(token.startsWith('ghs_'), true);
@@ -49,13 +49,13 @@ void main() {
     );
     final token = await auth.getInstallationToken(
       owner: 'abichinger',
-      repo: 'nonobattle-issues',
+      repo: 'github-issues-test',
     );
 
     final app = Github(Authentication.token(token));
     final created = await app.createIssue(
       owner: 'abichinger',
-      repo: 'nonobattle-issues',
+      repo: 'github-issues-test',
       issue: const IssueRequest(title: "Hello World (Github App)"),
     );
     expect(created, true);
@@ -68,7 +68,7 @@ void main() {
     final app = Github(Authentication.token(token));
     final created = await app.createIssue(
       owner: 'abichinger',
-      repo: 'nonobattle-issues',
+      repo: 'github-issues-test',
       issue: const IssueRequest(title: "Hello World (Personal Token)"),
     );
     expect(created, true);
@@ -79,7 +79,7 @@ void main() {
     expect(
         app.createIssue(
           owner: 'abichinger',
-          repo: 'nonobattle-issues',
+          repo: 'github-issues-test',
           issue: const IssueRequest(title: "Hello World (Personal Token)"),
         ),
         throwsA(const TypeMatcher<ResponseException>()));

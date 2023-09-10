@@ -33,7 +33,7 @@ import 'package:github_issues/github_issues.dart';
 
 const appId = 385403;
 const owner = 'abichinger';
-const repo = 'nonobattle-issues';
+const repo = 'github-issues-test';
 
 // Personal access token
 Future<String> get personalToken {
@@ -101,7 +101,7 @@ Widget _buildDialog(
 
             await github.createIssue(
               owner: 'abichinger',
-              repo: 'nonobattle-issues',
+              repo: 'github-issues-test',
               issue: issue,
             );
 

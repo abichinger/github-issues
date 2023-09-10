@@ -45,7 +45,7 @@ class GithubIssuesExample extends StatelessWidget {
                     return _buildDialog(
                       context,
                       owner: 'abichinger',
-                      repo: 'nonobattle-issues',
+                      repo: 'github-issues-test',
                       initialValue: const IssueRequest(title: "Hello World!"),
                     );
                   },
@@ -62,7 +62,7 @@ class GithubIssuesExample extends StatelessWidget {
                     return _buildDialog(
                       context,
                       owner: 'abichinger',
-                      repo: 'nonobattle-issues',
+                      repo: 'github-issues-test',
                       showTitle: false,
                       initialValue: const IssueRequest(title: "Hidden Title"),
                     );
