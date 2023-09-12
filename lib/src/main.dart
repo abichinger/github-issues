@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:github_issues/github_issues_dart.dart';
+import 'package:github_issues/src/github.dart';
 
 const appId = 385403;
 const owner = 'abichinger';

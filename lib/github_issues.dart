@@ -1,3 +1,4 @@
+/// Flutter package to create github issues
 library github_issues;
 
 export 'src/github.dart';
