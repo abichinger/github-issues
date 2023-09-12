@@ -2,12 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:github_issues/github_issues.dart';
 
+const kOwner = 'abichinger';
+const kRepo = 'github-issues-test';
+
+late List<Label>? _labels;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  _labels = await getLabels();
+
+  runApp(const GithubIssuesExampleApp());
+}
+
 Future<String> get personalToken {
   return rootBundle.loadString('assets/token.txt');
 }
 
-void main() {
-  runApp(const GithubIssuesExampleApp());
+Future<List<Label>> getLabels() async {
+  final token = await personalToken;
+  final github = Github(Authentication.token(token));
+
+  return await github.getLabels(
+    owner: kOwner,
+    repo: kRepo,
+  );
 }
 
 class GithubIssuesExampleApp extends StatelessWidget {
@@ -44,9 +62,10 @@ class GithubIssuesExample extends StatelessWidget {
                   builder: (context) {
                     return _buildDialog(
                       context,
-                      owner: 'abichinger',
-                      repo: 'github-issues-test',
+                      owner: kOwner,
+                      repo: kRepo,
                       initialValue: const IssueRequest(title: "Hello World!"),
+                      labels: _labels,
                     );
                   },
                 );
@@ -61,15 +80,15 @@ class GithubIssuesExample extends StatelessWidget {
                   builder: (context) {
                     return _buildDialog(
                       context,
-                      owner: 'abichinger',
-                      repo: 'github-issues-test',
+                      owner: kOwner,
+                      repo: kRepo,
                       showTitle: false,
                       initialValue: const IssueRequest(title: "Hidden Title"),
                     );
                   },
                 );
               },
-              child: const Text('Give Feedback! (Hidden Title)'),
+              child: const Text('Give Feedback! (Only Comment)'),
             ),
           ],
         ),
@@ -83,6 +102,7 @@ class GithubIssuesExample extends StatelessWidget {
     required String repo,
     bool showTitle = true,
     IssueRequest? initialValue,
+    List<Label>? labels,
   }) {
     return AlertDialog(
       scrollable: true,
@@ -100,10 +120,12 @@ class GithubIssuesExample extends StatelessWidget {
           GithubIssueForm(
             showTitle: showTitle,
             initialValue: initialValue,
+            labels: labels,
             onClose: () {
               Navigator.pop(context);
             },
             onSubmit: (issue) async {
+              final navigator = Navigator.of(context);
               final token = await personalToken;
               final github = Github(Authentication.token(token));
 
@@ -113,7 +135,7 @@ class GithubIssuesExample extends StatelessWidget {
                 issue: issue,
               );
 
-              Navigator.pop(context);
+              navigator.pop();
             },
           ),
         ],

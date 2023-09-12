@@ -154,6 +154,21 @@ class Github {
     final json = jsonDecode(res.body) as Map<String, dynamic>;
     return json['state'] == 'open';
   }
+
+  // https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#list-labels-for-a-repository
+  Future<List<Label>> getLabels({
+    required String owner,
+    required String repo,
+  }) async {
+    final url = Uri.parse('$baseUrl/repos/$owner/$repo/labels');
+
+    final res = await _client.get(url, headers: _headers);
+    assertStatusCode(200, res);
+
+    return (jsonDecode(res.body) as List<dynamic>)
+        .map((e) => Label.fromJson(e))
+        .toList();
+  }
 }
 
 class ResponseException implements Exception {
@@ -230,4 +245,27 @@ class IssueRequest {
   factory IssueRequest.fromJson(Map<String, dynamic> json) =>
       _$IssueRequestFromJson(json);
   Map<String, dynamic> toJson() => _$IssueRequestToJson(this);
+}
+
+@JsonSerializable()
+class Label {
+  final int id;
+  @JsonKey(name: 'node_id')
+  final String nodeId;
+  final String url;
+  final String name;
+  final String? description;
+  final String color;
+
+  const Label({
+    required this.id,
+    required this.nodeId,
+    required this.url,
+    required this.name,
+    required this.description,
+    required this.color,
+  });
+
+  factory Label.fromJson(Map<String, dynamic> json) => _$LabelFromJson(json);
+  Map<String, dynamic> toJson() => _$LabelToJson(this);
 }

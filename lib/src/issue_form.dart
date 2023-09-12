@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:github_issues/src/github.dart';
+import 'package:github_issues/src/multi_select.dart';
 
 class GithubIssueForm extends StatefulWidget {
   final IssueRequest? initialValue;
@@ -16,6 +17,8 @@ class GithubIssueForm extends StatefulWidget {
   final Future<void> Function(IssueRequest issue) onSubmit;
   final Function()? onClose;
 
+  final List<Label>? labels;
+
   const GithubIssueForm({
     super.key,
     this.initialValue,
@@ -28,6 +31,7 @@ class GithubIssueForm extends StatefulWidget {
     this.bodyDecoration,
     this.bodyValidator,
     this.spacing = 16,
+    this.labels,
   });
 
   @override
@@ -37,11 +41,35 @@ class GithubIssueForm extends StatefulWidget {
 class _GithubIssueFormState extends State<GithubIssueForm> {
   final _formKey = GlobalKey<FormState>();
   late IssueRequest issue;
+  Map<String, Label> labelMap = {};
+  List<Label> _selectedLabels = [];
   String error = "";
+
+  List<Label> get selectedLabels => _selectedLabels;
+
+  set selectedLabels(List<Label> value) {
+    _selectedLabels = value;
+    setState(() {
+      issue = issue.copyWith(
+        labels: value.map((label) => label.name).toList(),
+      );
+    });
+  }
 
   @override
   void initState() {
     issue = widget.initialValue?.copyWith() ?? const IssueRequest(title: "");
+
+    for (final label in widget.labels ?? []) {
+      labelMap[label.name] = label;
+    }
+
+    _selectedLabels = issue.labels
+            ?.map((label) => labelMap[label])
+            .whereType<Label>()
+            .toList() ??
+        [];
+
     super.initState();
   }
 
@@ -62,6 +90,7 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
             _buildBody(),
             SizedBox(height: widget.spacing),
           ],
+          if (widget.labels != null) _buildLabels(),
           if (error.isNotEmpty) _buildError(),
           SizedBox(height: widget.spacing),
           Row(
@@ -129,6 +158,62 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
     );
   }
 
+  Widget _buildLabels() {
+    return ListTile(
+      title: const Text('Labels'),
+      subtitle: selectedLabels.isEmpty
+          ? const Text('None yet')
+          : Wrap(
+              children: selectedLabels.map((label) {
+                final item = LabelItem(label);
+
+                return ChipTheme(
+                  data: item.chipThemeData,
+                  child: Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Chip(
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      label: Text(
+                        label.name,
+                        style: TextStyle(
+                          color: item.textColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+      trailing: const Icon(Icons.settings),
+      onTap: () async {
+        final newLabels = await _selectLabels();
+        if (newLabels == null) {
+          return;
+        }
+        selectedLabels = newLabels;
+      },
+    );
+  }
+
+  Future<List<Label>?> _selectLabels() {
+    final items =
+        (widget.labels ?? []).map((label) => LabelItem(label)).toList();
+    final initialValue =
+        selectedLabels.map((label) => LabelItem(label)).toList();
+
+    return MultiSelect.dialog<Label, LabelItem>(
+      title: const Text(
+        'Labels',
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+      ),
+      context: context,
+      items: items,
+      initialValue: initialValue,
+    );
+  }
+
   // https://stackoverflow.com/a/68680939/3140799
   bool get isDarkMode {
     final theme = Theme.of(context);
@@ -180,6 +265,46 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
         error = e.message ?? "";
       });
     }
+  }
+}
+
+class LabelItem extends MultiSelectItem<Label> {
+  final Label _value;
+
+  LabelItem(Label value) : _value = value;
+
+  @override
+  Color get color {
+    return Color(
+      int.tryParse("ff${value.color}", radix: 16) ?? Colors.white.value,
+    );
+  }
+
+  @override
+  Color get textColor {
+    return Color.lerp(color, Colors.white, 0.6) ?? Colors.white;
+  }
+
+  @override
+  String get text => _value.name;
+
+  @override
+  Label get value => _value;
+
+  @override
+  ChipThemeData get chipThemeData {
+    final backgroundColor = Color.lerp(color, Colors.black, 0.4);
+
+    return ChipThemeData(
+      backgroundColor: backgroundColor,
+      selectedColor: backgroundColor,
+      checkmarkColor: textColor,
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: textColor,
+        ),
+      ),
+    );
   }
 }
 
