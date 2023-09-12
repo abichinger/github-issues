@@ -1,3 +1,9 @@
+## 2.0.1
+
+* fix dartdoc
+* dart format l10n files
+* update README
+
 ## 2.0.0
 
 * add dialog widget
