@@ -33,67 +33,25 @@ Use Github issues to collect user feedback.
 
 ## Usage
 
-### Dart
-
-```dart
-import 'dart:io';
-
-import 'package:github_issues/github_issues_dart.dart';
-
-const appId = 385403;
-const owner = 'abichinger';
-const repo = 'github-issues-test';
-
-// Personal access token
-Future<String> get personalToken {
-  return File('assets/token.txt').readAsString();
-}
-
-// Installation token of Github app
-Future<String> get installationToken async {
-  final pem = await File('assets/private.pem').readAsString();
-  return PrivateKeyAuth(id: appId, pem: pem)
-      .getInstallationToken(owner: owner, repo: repo);
-}
-
-void main() async {
-  final token = await personalToken;
-  // final token = await installationToken;
-
-  final github = Github(Authentication.token(token));
-  github.createIssue(
-    owner: owner,
-    repo: repo,
-    issue: const IssueRequest(
-      title: 'Hello World!',
-      body: '...',
-      labels: ['bug'],
-    ),
-  );
-}
-```
-
-### Flutter
-
 [Full example](https://pub.dev/packages/github_issues/example)
 
-**Fill input fields in advance**
+**Fill input fields in advance**:
 
 ```dart
 showDialog(
   context: context,
   builder: (context) {
     return GithubIssueDialog(
-      github: github,
-      owner: kOwner,
-      repo: kRepo,
+      github: Github(Authentication.token('PERSONAL_ACCESS_TOKEN'));,
+      owner: 'OWNER',
+      repo: 'REPO',
       initialValue: const IssueRequest(title: "Hello World!"),
     );
   },
 );
 ```
 
-**Pass your custom localizations**
+**Pass your custom localizations**:
 
 ```dart
 class CustomLocalization extends GithubIssuesLocalizationsEn {
@@ -105,10 +63,28 @@ showDialog(
   context: context,
   builder: (context) {
     return GithubIssueDialog(
-      github: github,
-      owner: kOwner,
-      repo: kRepo,
+      github: Github(Authentication.token('PERSONAL_ACCESS_TOKEN'));,
+      owner: 'OWNER',
+      repo: 'REPO',
       localizations: CustomLocalization(),
+    );
+  },
+);
+```
+
+**Show only comment input**:
+
+```dart
+showDialog(
+  context: context,
+  builder: (context) {
+    return GithubIssueDialog(
+      github: Github(Authentication.token('PERSONAL_ACCESS_TOKEN'));,
+      owner: 'OWNER',
+      repo: 'REPO',
+      showTitle: false,
+      labels: null,
+      initialValue: const IssueRequest(title: "Hidden Title"), // title is required
     );
   },
 );
