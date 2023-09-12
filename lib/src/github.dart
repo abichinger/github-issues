@@ -7,17 +7,21 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'github.g.dart';
 
+/// Base class for an github authentication
 class Authentication {
+  /// HTTP request headers
   Map<String, String> get headers {
     return {};
   }
 
   Authentication();
 
+  /// Factory method to create a [JWTAuth] instance
   factory Authentication.token(String token) {
     return JWTAuth(token);
   }
 
+  /// Factory method to create a [PrivateKeyAuth] instance
   factory Authentication.pem({
     required int id,
     required String pem,
@@ -26,7 +30,11 @@ class Authentication {
   }
 }
 
+/// [Authentication] using a JWT token
+///
+/// e.g. personal access token or installation token
 class JWTAuth extends Authentication {
+  /// JWT token
   final String token;
 
   JWTAuth(this.token);
@@ -45,8 +53,9 @@ class PrivateKeyAuth extends Authentication {
 
   PrivateKeyAuth({required this.id, required this.pem});
 
-  // Generating a JSON Web Token (JWT) for a GitHub App
-  // https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app
+  /// Generating a JSON Web Token (JWT) for a GitHub App
+  ///
+  /// https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app
   String createSignedJWT() {
     final jwt = JWT(
       {
@@ -82,9 +91,11 @@ class PrivateKeyAuth extends Authentication {
   }
 }
 
+/// Github API wrapper
 class Github {
   static const baseUrl = 'https://api.github.com';
 
+  /// Authentication used for Github API requests.
   final Authentication auth;
 
   final _client = http.Client();
@@ -99,7 +110,9 @@ class Github {
     };
   }
 
-  // https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#get-a-repository-installation-for-the-authenticated-app
+  /// Get a repository installation for the authenticated app
+  ///
+  /// https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#get-a-repository-installation-for-the-authenticated-app
   Future<String> getName() async {
     final url = Uri.parse('$baseUrl/app');
 
@@ -110,11 +123,10 @@ class Github {
     return json['name'];
   }
 
-  // Authenticating as a GitHub App installation
-  // https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation
-  //
-  // https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#get-a-repository-installation-for-the-authenticated-app
-
+  /// Get a repository installation for the authenticated app
+  ///
+  /// https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation
+  /// https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#get-a-repository-installation-for-the-authenticated-app
   Future<int> getInstallationId({
     required String owner,
     required String repo,
@@ -128,7 +140,9 @@ class Github {
     return json['id'];
   }
 
-  // https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#create-an-installation-access-token-for-an-app
+  /// Create an installation access token for an app
+  ///
+  /// https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#create-an-installation-access-token-for-an-app
   Future<String> getInstallationToken(int installationId) async {
     final url =
         Uri.parse('$baseUrl/app/installations/$installationId/access_tokens');
@@ -140,7 +154,9 @@ class Github {
     return json['token'];
   }
 
-  // https://docs.github.com/en/rest/issues/issues?apiVersion=2022-11-28#create-an-issue
+  /// Create an issue
+  ///
+  /// https://docs.github.com/en/rest/issues/issues?apiVersion=2022-11-28#create-an-issue
   Future<bool> createIssue(
       {required String owner,
       required String repo,
@@ -155,7 +171,9 @@ class Github {
     return json['state'] == 'open';
   }
 
-  // https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#list-labels-for-a-repository
+  /// List labels for a repository
+  ///
+  /// https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#list-labels-for-a-repository
   Future<List<Label>> getLabels({
     required String owner,
     required String repo,
@@ -208,11 +226,19 @@ assertStatusCode(int expected, http.Response res) {
 
 @JsonSerializable(includeIfNull: false)
 class IssueRequest {
+  /// The title of the issue
   final String title;
+
+  /// The contents of the issue
   final String? body;
+
   final String? assignee;
+
   final int? milestone;
+
+  /// Labels to associate with this issue
   final List<String>? labels;
+
   final List<String>? assignees;
 
   const IssueRequest({
@@ -265,6 +291,21 @@ class Label {
     required this.description,
     required this.color,
   });
+
+  factory Label.custom({
+    required String name,
+    required String color,
+    String? description,
+  }) {
+    return Label(
+      id: 0,
+      nodeId: '',
+      url: '',
+      name: name,
+      description: description,
+      color: color,
+    );
+  }
 
   factory Label.fromJson(Map<String, dynamic> json) => _$LabelFromJson(json);
   Map<String, dynamic> toJson() => _$LabelToJson(this);

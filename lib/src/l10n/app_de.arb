@@ -1,0 +1,14 @@
+{
+    "dialogTitle": "Feedback",
+    "dialogDescription": "Teile uns mit, wie wir unsere App verbessern können",
+    "title": "Titel",
+    "titleBlank": "Titel darf nicht leer sein",
+    "titleTooLong": "Titel ist zu lang (maximal 256 Zeichen)",
+    "body": "Kommentar",
+    "labels": "Labels",
+    "noLabels": "keine",
+    "done": "Senden",
+    "close": "Schließen",
+    "cancel": "Abbrechen",
+    "ok": "Ok"
+}

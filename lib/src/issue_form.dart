@@ -1,23 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:github_issues/src/flutter_util.dart';
 import 'package:github_issues/src/github.dart';
 import 'package:github_issues/src/multi_select.dart';
 
+/// A form to manipulate the values of an [IssueRequest]
 class GithubIssueForm extends StatefulWidget {
+  /// The initial value of the form fields. Make sure to set an initial value for [IssueRequest.title] if [showTitle] is false
   final IssueRequest? initialValue;
+
+  /// Vertical spacing between form fields
   final double spacing;
 
+  /// Sets the visibility of the title field.
   final bool showTitle;
+
+  /// [InputDecoration] of title field
   final InputDecoration? titleDecoration;
+
+  /// [FormFieldValidator] of title field
   final String? Function(String?)? titleValidator;
 
+  /// Sets the visibility of the comment field.
   final bool showBody;
+
+  /// [InputDecoration] of comment field
   final InputDecoration? bodyDecoration;
+
+  /// [FormFieldValidator] of comment field
   final String? Function(String?)? bodyValidator;
 
+  /// Called when the form is submitted
   final Future<void> Function(IssueRequest issue) onSubmit;
+
+  /// Called when the input is aborted
   final Function()? onClose;
 
+  /// A List of Github issue labels
+  ///
+  /// If null is passed, then the label input will be hidden.
   final List<Label>? labels;
+
+  final MultiSelectThemeData multiSelectThemeData;
 
   const GithubIssueForm({
     super.key,
@@ -32,6 +55,11 @@ class GithubIssueForm extends StatefulWidget {
     this.bodyValidator,
     this.spacing = 16,
     this.labels,
+    this.multiSelectThemeData = const MultiSelectThemeData(
+      constraints: BoxConstraints(
+        maxWidth: 500,
+      ),
+    ),
   });
 
   @override
@@ -75,6 +103,7 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     const double hSpacing = 8;
 
     return Form(
@@ -97,8 +126,7 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               if (widget.onClose != null)
-                TextButton(
-                    onPressed: widget.onClose, child: const Text('Close')),
+                TextButton(onPressed: widget.onClose, child: Text(l10n.close)),
               const SizedBox(
                 width: hSpacing,
               ),
@@ -106,7 +134,7 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
                 onPressed: () async {
                   await _submit();
                 },
-                child: const Text('Done'),
+                child: Text(l10n.done),
               ),
             ],
           )
@@ -116,22 +144,24 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
   }
 
   Widget _buildTitle() {
+    final l10n = context.l10n;
+
     return TextFormField(
       initialValue: issue.title,
       validator: widget.titleValidator ??
           (value) {
             if (value == null || value.isEmpty) {
-              return 'Title can\'t be blank';
+              return l10n.titleBlank;
             }
             if (value.length > 256) {
-              return 'Title is too long (maximum is 256 characters)';
+              return l10n.titleTooLong;
             }
             return null;
           },
       decoration: widget.titleDecoration ??
-          const InputDecoration(
-            labelText: 'Title',
-            border: OutlineInputBorder(),
+          InputDecoration(
+            labelText: l10n.title,
+            border: const OutlineInputBorder(),
           ),
       maxLines: 1,
       onSaved: (value) {
@@ -141,13 +171,15 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
   }
 
   Widget _buildBody() {
+    final l10n = context.l10n;
+
     return TextFormField(
       initialValue: issue.body,
       validator: widget.bodyValidator,
       decoration: widget.bodyDecoration ??
-          const InputDecoration(
-            labelText: 'Comment',
-            border: OutlineInputBorder(),
+          InputDecoration(
+            labelText: l10n.body,
+            border: const OutlineInputBorder(),
           ),
       minLines: 3,
       maxLines: 5,
@@ -159,10 +191,12 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
   }
 
   Widget _buildLabels() {
+    final l10n = context.l10n;
+
     return ListTile(
-      title: const Text('Labels'),
+      title: Text(l10n.labels),
       subtitle: selectedLabels.isEmpty
-          ? const Text('None yet')
+          ? Text(l10n.noLabels)
           : Wrap(
               children: selectedLabels.map((label) {
                 final item = LabelItem(label);
@@ -198,19 +232,24 @@ class _GithubIssueFormState extends State<GithubIssueForm> {
   }
 
   Future<List<Label>?> _selectLabels() {
+    final l10n = context.l10n;
+
     final items =
         (widget.labels ?? []).map((label) => LabelItem(label)).toList();
     final initialValue =
         selectedLabels.map((label) => LabelItem(label)).toList();
 
     return MultiSelect.dialog<Label, LabelItem>(
-      title: const Text(
-        'Labels',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+      title: Text(
+        l10n.labels,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
       ),
       context: context,
       items: items,
       initialValue: initialValue,
+      ok: Text(l10n.ok),
+      cancel: Text(l10n.cancel),
+      multiSelectThemeData: widget.multiSelectThemeData,
     );
   }
 

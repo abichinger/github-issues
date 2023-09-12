@@ -10,10 +10,19 @@ For general information about developing packages, see the Dart guide for
 and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
+# Github Issues
+
+[![Pub Version](https://img.shields.io/pub/v/github_issues.svg)](https://pub.dev/packages/github_issues)
 
 Use Github issues to collect user feedback.
 
 <img src="https://github.com/abichinger/github-issues/raw/main/screenshots/screenshots.png" alt="Screenshots">
+
+## Features
+
+- Create Github issues with title, comment and labels
+- Easy internationalization with `GithubIssuesLocalizations`
+- Supports two authentication methods
 
 ## Getting started
 
@@ -68,48 +77,39 @@ void main() async {
 
 [Full example](https://pub.dev/packages/github_issues/example)
 
+**Fill input fields in advance**
+
 ```dart
-import 'package:github_issues/github_issues.dart';
+showDialog(
+  context: context,
+  builder: (context) {
+    return GithubIssueDialog(
+      github: github,
+      owner: kOwner,
+      repo: kRepo,
+      initialValue: const IssueRequest(title: "Hello World!"),
+    );
+  },
+);
+```
 
-Widget _buildDialog(
-  BuildContext context, {
-  bool showTitle = true,
-  IssueRequest? initialValue,
-}) {
-  return AlertDialog(
-    scrollable: true,
-    title: const Text(
-      'Thanks for your feedback!',
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-    content: Column(
-      children: [
-        const Text('Let us know how we can improve this example.'),
-        const SizedBox(height: 16),
-        GithubIssueForm(
-          showTitle: showTitle,
-          initialValue: initialValue,
-          onClose: () {
-            Navigator.pop(context);
-          },
-          onSubmit: (issue) async {
-            final token = await personalToken;
-            final github = Github(Authentication.token(token));
+**Pass your custom localizations**
 
-            await github.createIssue(
-              owner: 'abichinger',
-              repo: 'github-issues-test',
-              issue: issue,
-            );
-
-            Navigator.pop(context);
-          },
-        ),
-      ],
-    ),
-  );
+```dart
+class CustomLocalization extends GithubIssuesLocalizationsEn {
+  @override
+  String get dialogTitle => 'Thanks for your feedback!';
 }
+
+showDialog(
+  context: context,
+  builder: (context) {
+    return GithubIssueDialog(
+      github: github,
+      owner: kOwner,
+      repo: kRepo,
+      localizations: CustomLocalization(),
+    );
+  },
+);
 ```

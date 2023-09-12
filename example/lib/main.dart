@@ -5,11 +5,13 @@ import 'package:github_issues/github_issues.dart';
 const kOwner = 'abichinger';
 const kRepo = 'github-issues-test';
 
-late List<Label>? _labels;
+late Github github;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  _labels = await getLabels();
+
+  final token = await personalToken;
+  github = Github(Authentication.token(token));
 
   runApp(const GithubIssuesExampleApp());
 }
@@ -18,22 +20,13 @@ Future<String> get personalToken {
   return rootBundle.loadString('assets/token.txt');
 }
 
-Future<List<Label>> getLabels() async {
-  final token = await personalToken;
-  final github = Github(Authentication.token(token));
-
-  return await github.getLabels(
-    owner: kOwner,
-    repo: kRepo,
-  );
-}
-
 class GithubIssuesExampleApp extends StatelessWidget {
   const GithubIssuesExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.light,
       theme: ThemeData(useMaterial3: true),
       darkTheme: ThemeData.dark(useMaterial3: true),
@@ -44,6 +37,10 @@ class GithubIssuesExampleApp extends StatelessWidget {
 
 class GithubIssuesExample extends StatelessWidget {
   const GithubIssuesExample({super.key});
+
+  String colorToRadixString(Color color) {
+    return color.value.toRadixString(16);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +57,11 @@ class GithubIssuesExample extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) {
-                    return _buildDialog(
-                      context,
+                    return GithubIssueDialog(
+                      github: github,
                       owner: kOwner,
                       repo: kRepo,
                       initialValue: const IssueRequest(title: "Hello World!"),
-                      labels: _labels,
                     );
                   },
                 );
@@ -78,68 +74,88 @@ class GithubIssuesExample extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) {
-                    return _buildDialog(
-                      context,
+                    return GithubIssueDialog(
+                      github: github,
+                      owner: kOwner,
+                      repo: kRepo,
+                      initialValue: const IssueRequest(title: "Hello World!"),
+                      labels: null,
+                    );
+                  },
+                );
+              },
+              child: const Text('Feedback (labels hidden)'),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return GithubIssueDialog(
+                      github: github,
                       owner: kOwner,
                       repo: kRepo,
                       showTitle: false,
+                      labels: null,
                       initialValue: const IssueRequest(title: "Hidden Title"),
                     );
                   },
                 );
               },
-              child: const Text('Give Feedback! (Only Comment)'),
+              child: const Text('Feedback (Only comment)'),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return GithubIssueDialog(
+                      github: github,
+                      owner: kOwner,
+                      repo: kRepo,
+                      localizations: CustomLocalization(),
+                    );
+                  },
+                );
+              },
+              child: const Text('Feedback (Custom localization)'),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return GithubIssueDialog(
+                      github: github,
+                      owner: kOwner,
+                      repo: kRepo,
+                      labels: [
+                        Label.custom(
+                          name: 'bug',
+                          color: colorToRadixString(Colors.red.shade600),
+                        ),
+                        Label.custom(
+                          name: 'documentation',
+                          color: colorToRadixString(Colors.blue.shade600),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text('Feedback (hardcoded labels)'),
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildDialog(
-    BuildContext context, {
-    required String owner,
-    required String repo,
-    bool showTitle = true,
-    IssueRequest? initialValue,
-    List<Label>? labels,
-  }) {
-    return AlertDialog(
-      scrollable: true,
-      title: const Text(
-        'Thanks for your feedback!',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      content: Column(
-        children: [
-          const Text('Let us know how we can improve this example.'),
-          const SizedBox(height: 16),
-          GithubIssueForm(
-            showTitle: showTitle,
-            initialValue: initialValue,
-            labels: labels,
-            onClose: () {
-              Navigator.pop(context);
-            },
-            onSubmit: (issue) async {
-              final navigator = Navigator.of(context);
-              final token = await personalToken;
-              final github = Github(Authentication.token(token));
-
-              await github.createIssue(
-                owner: owner,
-                repo: repo,
-                issue: issue,
-              );
-
-              navigator.pop();
-            },
-          ),
-        ],
-      ),
-    );
-  }
+class CustomLocalization extends GithubIssuesLocalizationsEn {
+  @override
+  String get dialogTitle => 'Thanks for your feedback!';
 }

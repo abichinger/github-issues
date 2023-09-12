@@ -8,6 +8,27 @@ abstract class MultiSelectItem<T> {
   ChipThemeData get chipThemeData;
 }
 
+class MultiSelectThemeData {
+  final BoxConstraints constraints;
+
+  const MultiSelectThemeData({this.constraints = const BoxConstraints()});
+}
+
+class MultiSelectTheme extends InheritedWidget {
+  final MultiSelectThemeData data;
+
+  const MultiSelectTheme({super.key, required this.data, required super.child});
+
+  static MultiSelectThemeData? maybeOf(BuildContext context) {
+    final theme =
+        context.dependOnInheritedWidgetOfExactType<MultiSelectTheme>();
+    return theme?.data;
+  }
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
+}
+
 class MultiSelect<I, T extends MultiSelectItem<I>> extends StatefulWidget {
   final List<T> initialValue;
   final List<T> items;
@@ -28,35 +49,41 @@ class MultiSelect<I, T extends MultiSelectItem<I>> extends StatefulWidget {
     required List<T> items,
     List<T> initialValue = const [],
     Widget? title,
+    Widget ok = const Text('Ok'),
+    Widget cancel = const Text('Cancel'),
+    MultiSelectThemeData? multiSelectThemeData,
   }) async {
     var selected = [...initialValue.map((e) => e.value)];
 
     return await showDialog<List<I>?>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: title,
-          content: MultiSelect<I, T>(
-            items: items,
-            initialValue: initialValue,
-            onChanged: (value) {
-              selected = value;
-            },
+        return MultiSelectTheme(
+          data: multiSelectThemeData ?? const MultiSelectThemeData(),
+          child: AlertDialog(
+            title: title,
+            content: MultiSelect<I, T>(
+              items: items,
+              initialValue: initialValue,
+              onChanged: (value) {
+                selected = value;
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: cancel,
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context, selected);
+                },
+                child: ok,
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, selected);
-              },
-              child: Text('Ok'),
-            ),
-          ],
         );
       },
     );
@@ -75,38 +102,44 @@ class _MultiSelectState<I, T extends MultiSelectItem<I>>
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      children: widget.items.map((item) {
-        return ChipTheme(
-          data: item.chipThemeData,
-          child: Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: MyChoiceChip(
-              label: Text(
-                item.text,
-                style: TextStyle(
-                  color: item.textColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
+    final theme =
+        MultiSelectTheme.maybeOf(context) ?? const MultiSelectThemeData();
+
+    return ConstrainedBox(
+      constraints: theme.constraints,
+      child: Wrap(
+        children: widget.items.map((item) {
+          return ChipTheme(
+            data: item.chipThemeData,
+            child: Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: MyChoiceChip(
+                label: Text(
+                  item.text,
+                  style: TextStyle(
+                    color: item.textColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
+                selected: _selectedItems.contains(item.value),
+                onSelected: (value) {
+                  if (_selectedItems.contains(item.value)) {
+                    setState(() {
+                      _selectedItems.remove(item.value);
+                    });
+                  } else {
+                    setState(() {
+                      _selectedItems.add(item.value);
+                    });
+                  }
+                  widget.onChanged([..._selectedItems]);
+                },
               ),
-              selected: _selectedItems.contains(item.value),
-              onSelected: (value) {
-                if (_selectedItems.contains(item.value)) {
-                  setState(() {
-                    _selectedItems.remove(item.value);
-                  });
-                } else {
-                  setState(() {
-                    _selectedItems.add(item.value);
-                  });
-                }
-                widget.onChanged([..._selectedItems]);
-              },
             ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 }

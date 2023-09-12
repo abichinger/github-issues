@@ -1,0 +1,6 @@
+arb-dir: lib/src/l10n
+output-dir: lib/src/l10n/gen
+output-class: GithubIssuesLocalizations
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+synthetic-package: false

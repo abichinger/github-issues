@@ -1,6 +1,6 @@
 name: github_issues
-description: Flutter package to create Github issues
-version: 1.0.1
+description: Flutter package to create Github issues. Good for collecting user feedback.
+version: 2.0.0
 homepage: https://github.com/abichinger/github-issues
 repository: https://github.com/abichinger/github-issues
 
@@ -15,6 +15,9 @@ dependencies:
   http: ^1.1.0
   
   json_annotation: ^4.8.1
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 
 dev_dependencies:
   flutter_test:
@@ -28,6 +31,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true
 
   # To add assets to your package, add an assets section, like this:
   # assets:
