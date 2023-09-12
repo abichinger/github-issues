@@ -8,7 +8,8 @@ class GithubIssuesLocalizationsDe extends GithubIssuesLocalizations {
   String get dialogTitle => 'Feedback';
 
   @override
-  String get dialogDescription => 'Teile uns mit, wie wir unsere App verbessern können';
+  String get dialogDescription =>
+      'Teile uns mit, wie wir unsere App verbessern können';
 
   @override
   String get title => 'Titel';

@@ -60,15 +60,18 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the GithubIssuesLocalizations.supportedLocales
 /// property.
 abstract class GithubIssuesLocalizations {
-  GithubIssuesLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  GithubIssuesLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
   static GithubIssuesLocalizations? of(BuildContext context) {
-    return Localizations.of<GithubIssuesLocalizations>(context, GithubIssuesLocalizations);
+    return Localizations.of<GithubIssuesLocalizations>(
+        context, GithubIssuesLocalizations);
   }
 
-  static const LocalizationsDelegate<GithubIssuesLocalizations> delegate = _GithubIssuesLocalizationsDelegate();
+  static const LocalizationsDelegate<GithubIssuesLocalizations> delegate =
+      _GithubIssuesLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -80,7 +83,8 @@ abstract class GithubIssuesLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -166,34 +170,36 @@ abstract class GithubIssuesLocalizations {
   String get ok;
 }
 
-class _GithubIssuesLocalizationsDelegate extends LocalizationsDelegate<GithubIssuesLocalizations> {
+class _GithubIssuesLocalizationsDelegate
+    extends LocalizationsDelegate<GithubIssuesLocalizations> {
   const _GithubIssuesLocalizationsDelegate();
 
   @override
   Future<GithubIssuesLocalizations> load(Locale locale) {
-    return SynchronousFuture<GithubIssuesLocalizations>(lookupGithubIssuesLocalizations(locale));
+    return SynchronousFuture<GithubIssuesLocalizations>(
+        lookupGithubIssuesLocalizations(locale));
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['de', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['de', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_GithubIssuesLocalizationsDelegate old) => false;
 }
 
 GithubIssuesLocalizations lookupGithubIssuesLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'de': return GithubIssuesLocalizationsDe();
-    case 'en': return GithubIssuesLocalizationsEn();
+    case 'de':
+      return GithubIssuesLocalizationsDe();
+    case 'en':
+      return GithubIssuesLocalizationsEn();
   }
 
   throw FlutterError(
-    'GithubIssuesLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'GithubIssuesLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }
